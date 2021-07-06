@@ -1,0 +1,57 @@
+#QYERY 1
+
+#For every city that exceeds the 500 orders 
+#how many orders are placed in the "Breakfast" cuisine (Breakfast_Orders)?
+
+SELECT initial_table.city,COUNT(initial_table.order_id) AS number_of_orders
+FROM `bi-2019-test.ad_hoc.orders_jan2021`as initial_table
+WHERE initial_table.cuisine_parent= 'Breakfast' 
+and initial_table.city in (SELECT city , 
+FROM `bi-2019-test.ad_hoc.orders_jan2021`
+GROUP BY city
+HAVING COUNT(order_id) > 500
+ORDER BY city)
+GROUP BY city 
+ORDER BY number_of_orders desc 
+LIMIT 10
+
+_____________________________________________________________________________________________________________________________
+#QYERY 2
+
+#For every city that exceeds the 500 orders
+#how many users ordered from the "Breakfast" cuisine (Breakfast_Users)?
+
+SELECT initial_table.city,COUNT(distinct(initial_table.user_id)) AS number_of_users
+FROM `bi-2019-test.ad_hoc.orders_jan2021`as initial_table
+WHERE initial_table.cuisine_parent= 'Breakfast' 
+and initial_table.city in (SELECT city , 
+FROM `bi-2019-test.ad_hoc.orders_jan2021`
+GROUP BY city
+HAVING COUNT(order_id) > 500)
+GROUP BY initial_table.city 
+ORDER BY COUNT(order_id)desc 
+LIMIT 10
+
+_____________________________________________________________________________________________________________________________
+#QUERY 3
+
+#For every city that exceeds the 500 order
+#what is the Average Basket  of the Breakfast_Users that we defined before?
+
+SELECT table_1.city,  round(SUM(table_1.Basket)/COUNT(distinct(table_1.user_id)),2) AS Average_Basket
+FROM `bi-2019-test.ad_hoc.orders_jan2021`as table_1
+WHERE table_1.city in (SELECT city , 
+FROM `bi-2019-test.ad_hoc.orders_jan2021`
+GROUP BY city
+HAVING COUNT(order_id) > 500)
+and table_1.user_id in 
+(SELECT initial_table.user_id
+FROM `bi-2019-test.ad_hoc.orders_jan2021`as initial_table
+WHERE initial_table.cuisine_parent= 'Breakfast' 
+and initial_table.city in (SELECT city , 
+FROM `bi-2019-test.ad_hoc.orders_jan2021`
+GROUP BY city
+HAVING COUNT(order_id) > 500))
+GROUP BY city
+ORDER BY city 
+LIMIT 10
